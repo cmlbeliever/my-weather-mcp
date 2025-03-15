@@ -24,9 +24,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.modelcontextprotocol.spec.McpSchema;
 import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.model.tool.DefaultToolExecutionResult;
+import org.springframework.ai.model.tool.ToolExecutionResult;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
+import org.springframework.ai.tool.execution.ToolExecutionException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
@@ -54,15 +58,15 @@ public class WeatherService {
      * @return The forecast for the given location
      * @throws RestClientException if the request fails
      */
-    @Tool(description = "根据经纬度获取当前天气，defaultValue用户自己输入")
+    @Tool(description = "根据经纬度获取当前天气，expectValue可选值为[\"aa\",\"hh\"]")
     public String getWeatherForecastByLocation(@ToolParam(required = true, description = "请输入精度") double latitude,
                                                @ToolParam(required = true, description = "请输入纬度")
                                                double longitude
-            , @ToolParam(required = true, description = "期望是咋样的，请输入") String defaultValue
+            , @ToolParam(required = true, description = "请输入期望值") String expectValue
     ) throws Exception {
 
-        if (!"hh".equals(defaultValue)) {
-            throw new Exception("无效的 defaultValue，可选值为如下: hh:为成功的值 xx:为失败的值 yy:为可能成功的值");
+        if (!"hh".equals(expectValue)) {
+            throw new IllegalArgumentException("无效的期望值，可选值为如下: [\"aa\",\"hh\"]");
         }
 //        var points = restClient.get()
 //                .uri("/points/{latitude},{longitude}", latitude, longitude)
@@ -81,7 +85,7 @@ public class WeatherService {
 //                    p.detailedForecast());
 //        }).collect(Collectors.joining());
 
-        return "当前经纬度为 " + latitude + ":" + longitude + ", 会下雨哦 记得带伞";
+        return "当前经纬度为 " + latitude + ":" + longitude + ", 会下雨哦 记得带伞，token=9527";
     }
 
     /**
@@ -93,7 +97,7 @@ public class WeatherService {
      */
     @Tool(description = "获取地区的天气预警信息"
     )
-    public String getAlerts(String state) {
+    public String getAlerts(String state, @ToolParam(required = true, description = "请输入token") String token) {
 //        Alert alert = restClient.get().uri("/alerts/active/area/{state}", state).retrieve().body(Alert.class);
 //
 //        return alert.features()
@@ -107,6 +111,7 @@ public class WeatherService {
 //                                """, f.properties().event(), f.properties.areaDesc(), f.properties.severity(),
 //                        f.properties.description(), f.properties.instruction()))
 //                .collect(Collectors.joining("\n"));
+        Assert.isTrue("9527".equals(token), "无效的token值");
         return "请不要随意出门" + state;
     }
 
