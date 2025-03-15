@@ -1,0 +1,114 @@
+/*
+ * Copyright 2024 - 2024 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.cml.mcp;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.modelcontextprotocol.spec.McpSchema;
+import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.ai.tool.annotation.ToolParam;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
+
+@Service
+public class WeatherService {
+
+    private static final String BASE_URL = "https://api.weather.gov";
+
+    private final RestClient restClient;
+
+    public WeatherService() {
+
+        this.restClient = RestClient.builder()
+                .baseUrl(BASE_URL)
+                .defaultHeader("Accept", "application/geo+json")
+                .defaultHeader("User-Agent", "WeatherApiClient/1.0 (your@email.com)")
+                .build();
+    }
+
+    /**
+     * Get forecast for a specific latitude/longitude
+     *
+     * @param latitude  Latitude
+     * @param longitude Longitude
+     * @return The forecast for the given location
+     * @throws RestClientException if the request fails
+     */
+    @Tool(description = "根据经纬度获取当前天气，defaultValue用户自己输入")
+    public String getWeatherForecastByLocation(@ToolParam(required = true, description = "请输入精度") double latitude,
+                                               @ToolParam(required = true, description = "请输入纬度")
+                                               double longitude
+            , @ToolParam(required = true, description = "期望是咋样的，请输入") String defaultValue
+    ) throws Exception {
+
+        if (!"hh".equals(defaultValue)) {
+            throw new Exception("无效的 defaultValue，可选值为如下: hh:为成功的值 xx:为失败的值 yy:为可能成功的值");
+        }
+//        var points = restClient.get()
+//                .uri("/points/{latitude},{longitude}", latitude, longitude)
+//                .retrieve()
+//                .body(Points.class);
+
+//        var forecast = restClient.get().uri(points.properties().forecast()).retrieve().body(Forecast.class);
+
+//        String forecastText = forecast.properties().periods().stream().map(p -> {
+//            return String.format("""
+//                            %s:
+//                            Temperature: %s %s
+//                            Wind: %s %s
+//                            Forecast: %s
+//                            """, p.name(), p.temperature(), p.temperatureUnit(), p.windSpeed(), p.windDirection(),
+//                    p.detailedForecast());
+//        }).collect(Collectors.joining());
+
+        return "当前经纬度为 " + latitude + ":" + longitude + ", 会下雨哦 记得带伞";
+    }
+
+    /**
+     * Get alerts for a specific area
+     *
+     * @param state Area code. Two-letter US state code (e.g. CA, NY)
+     * @return Human readable alert information
+     * @throws RestClientException if the request fails
+     */
+    @Tool(description = "获取地区的天气预警信息"
+    )
+    public String getAlerts(String state) {
+//        Alert alert = restClient.get().uri("/alerts/active/area/{state}", state).retrieve().body(Alert.class);
+//
+//        return alert.features()
+//                .stream()
+//                .map(f -> String.format("""
+//                                Event: %s
+//                                Area: %s
+//                                Severity: %s
+//                                Description: %s
+//                                Instructions: %s
+//                                """, f.properties().event(), f.properties.areaDesc(), f.properties.severity(),
+//                        f.properties.description(), f.properties.instruction()))
+//                .collect(Collectors.joining("\n"));
+        return "请不要随意出门" + state;
+    }
+
+
+}
